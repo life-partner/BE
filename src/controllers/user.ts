@@ -5,6 +5,7 @@ import cryptojs from 'crypto-js';
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { MysqlError } from 'mysql';
+import { devNull } from 'os';
 
 // const router = express.Router();
 
@@ -42,7 +43,7 @@ const login = (req: Request, res: Response) => {
   const { nickname, password } = req.body;
   try {
     const privateKey: string | undefined = process.env.PASSWORD_SECRET_KEY;
-    db.query('select * from users where nickname=?', nickname, (error: MysqlError | null, result: any[]) => {
+    db.query('select * from user where nickname=?', nickname, (error: MysqlError | null, result: any[]) => {
       if (result.length < 1) {
         return res.status(401).json({
           result: false,
@@ -96,22 +97,102 @@ const modify_password = (req: Request, res: Response) => {
   const { password, modifiedPassword } = req.body;
   try {
     const privateKey: string | undefined = process.env.PASSWORD_SECRET_KEY;
-    const bytes = cryptojs.AES.decrypt(result[0].password, privateKey!);
+    const bytes = cryptojs.AES.decrypt(user.password, privateKey!);
     const decrypted = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
-    db.query('select * from users where nickname=?', user.nickname, (error: MysqlError | null, result: any[]) => {
+    db.query('select * from user where nickname=?', user.nickname, (error: MysqlError | null, result: any[]) => {
       if (password === decrypted) {
-        res.status(200).json({
-          result: true,
+        db.query('update user set password=? where nickname=?', [modifiedPassword, user.nickname], (error, result) => {
+          if (error) {
+            return res.status(400).json({
+              result: false,
+            });
+          }
+          return res.status(200).json({
+            result: true,
+          });
         });
       } else {
         res.status(400).json({
           result: false,
-          message: '비밀번호가 틀립니다. 다시 확인해주세요.',
         });
       }
     });
   } catch (error) {
-    console.log('catch error in login: ', error);
+    console.log('catch error in modify_password: ', error);
+    res.status(400).json({
+      result: false,
+    });
+  }
+};
+
+const modify_phone = (req: Request, res: Response) => {
+  const { user } = res.locals;
+  const { phone } = req.body;
+
+  try {
+    db.query('update user set phone=? where nickname=?', [phone, user.nickname], (error, result) => {
+      if (error)
+        return res.json({
+          result: false,
+        });
+      return res.json({
+        result: true,
+      });
+    });
+  } catch (error) {
+    console.log('catch error in modify_phone: ', error);
+    res.status(400).json({
+      result: false,
+    });
+  }
+};
+
+const modify_address = (req: Request, res: Response) => {
+  const { user } = res.locals;
+  const { address, detail_address } = req.body;
+
+  try {
+    db.query(
+      'update user set address=?, detail_address=? where nickname=?',
+      [address, detail_address, user.nickname],
+      (error, result) => {
+        if (error)
+          return res.json({
+            result: false,
+          });
+        return res.json({
+          result: true,
+        });
+      },
+    );
+  } catch (error) {
+    console.log('catch error in modify_address: ', error);
+    res.status(400).json({
+      result: false,
+    });
+  }
+};
+
+const modify_account = (req: Request, res: Response) => {
+  const { user } = res.locals;
+  const { bank, accout, holder } = req.body;
+
+  try {
+    db.query(
+      'update user set bank=?, account=?, holder=? where nickname=?',
+      [bank, accout, holder, user.nickname],
+      (error, result) => {
+        if (error)
+          return res.json({
+            result: false,
+          });
+        return res.json({
+          result: true,
+        });
+      },
+    );
+  } catch (error) {
+    console.log('catch error in modify_account: ', error);
     res.status(400).json({
       result: false,
     });
