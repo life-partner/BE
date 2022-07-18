@@ -12,5 +12,6 @@ router.patch('/users/user-info/password', auth, user_controller.modify_password)
 router.patch('/users/user-info/phone', auth, user_controller.modify_phone);
 router.patch('/users/user-info/address', auth, user_controller.modify_address);
 router.patch('/users/user-info/bank-account', auth, user_controller.modify_account);
+router.delete('/users/withdraw', auth, user_controller.withdraw);
 
 export default router;

@@ -9,6 +9,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   if (!authorization) return res.status(400).json({ result: false });
 
   const [token_type, token_value] = authorization.split(' ');
+  if (token_type === 'NOT') next();
   if (token_type !== 'Bearer') return res.status(400).json({ result: false });
 
   try {
