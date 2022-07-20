@@ -7,10 +7,16 @@ import { MysqlError } from 'mysql';
 
 const signup = (req: Request, res: Response) => {
   const { nickname, password, phone, address, detail_address, bank, account, holder } = req.body;
+  // 필수 데이터 중 하나라도 빈 값으로 넘어오면 예외 처리
+  if (!nickname || !password || !phone || !address || !detail_address)
+    return res.status(401).json({
+      result: false,
+      err_code: 401,
+    });
   try {
     // 중복 닉네임 확인
     db.query('select nickname from user where nickname=?', nickname, (error: MysqlError | null, result: any[]) => {
-      if (result[0].length > 0)
+      if (result.length > 0)
         return res.status(401).json({
           result: false,
           err_code: 401,
@@ -19,7 +25,7 @@ const signup = (req: Request, res: Response) => {
     const privateKey: string | undefined = process.env.PASSWORD_SECRET_KEY;
     const encrypted = cryptojs.AES.encrypt(JSON.stringify(password), privateKey!).toString();
     const query =
-      'insert into user(userID, password, phone, address, detail_address, bank, account, holder, current_point) ' +
+      'insert into user(nickname, password, phone, address, detail_address, bank, account, holder, current_point) ' +
       'values(?, ?, ?, ?, ?, ?, ?, ?, ?)';
     const value = [nickname, encrypted, phone, address, detail_address, bank, account, holder, 1000];
     db.query(query, value, () => {
@@ -109,7 +115,7 @@ const modify_password = (req: Request, res: Response) => {
           });
         });
       } else {
-        res.status(400).json({
+        return res.status(400).json({
           result: false,
         });
       }
@@ -170,11 +176,11 @@ const modify_address = (req: Request, res: Response) => {
 
 const modify_account = (req: Request, res: Response) => {
   const { user } = res.locals;
-  const { bank, accout, holder } = req.body;
+  const { bank, account, holder } = req.body;
   try {
     db.query(
       'update user set bank=?, account=?, holder=? where nickname=?',
-      [bank, accout, holder, user.nickname],
+      [bank, account, holder, user.nickname],
       (error, result) => {
         if (error)
           return res.status(400).json({

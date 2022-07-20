@@ -125,8 +125,8 @@ const point = (req: Request, res: Response) => {
           });
         return res.status(200).json({
           result: true,
-          current_point: result[0].point,
-          history: [{ point_earned: result[0].point_earned, dateTime: result[0].date }],
+          current_point: result.point,
+          history: [{ point_earned: result.point_earned, dateTime: result.date }],
         });
       },
     );
