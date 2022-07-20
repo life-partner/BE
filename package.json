@@ -4,7 +4,8 @@
   "description": "",
   "main": "dist/src/server.js",
   "scripts": {
-    "start": "node dist/src/server.js",
+    "start": "pm2 start http/ubuntu/BE/dist/src/server.js",
+    "restart": "pm2 restart http/ubuntu/BE/dist/src/server.js",
     "build": "tsc -p .",
     "dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts"
   },
