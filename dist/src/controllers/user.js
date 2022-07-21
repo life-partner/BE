@@ -8,9 +8,9 @@ const DBindex_1 = __importDefault(require("../DBindex"));
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const signup = (req, res) => {
-    const { nickname, password, phone, address, detail_address, bank, account, holder } = req.body;
+    const { nickname, password, phone, address, detail_address, dong, bank, account, holder } = req.body;
     // 필수 데이터 중 하나라도 빈 값으로 넘어오면 예외 처리
-    if (!nickname || !password || !phone || !address || !detail_address)
+    if (!nickname || !password || !phone || !address || !detail_address || !dong)
         return res.status(401).json({
             result: false,
             err_code: 401,
@@ -26,9 +26,9 @@ const signup = (req, res) => {
         });
         const privateKey = process.env.PASSWORD_SECRET_KEY;
         const encrypted = crypto_js_1.default.AES.encrypt(JSON.stringify(password), privateKey).toString();
-        const query = 'insert into user(nickname, password, phone, address, detail_address, bank, account, holder, current_point) ' +
-            'values(?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        const value = [nickname, encrypted, phone, address, detail_address, bank, account, holder, 1000];
+        const query = 'insert into user(nickname, password, phone, address, detail_address, dong, bank, account, holder, current_point) ' +
+            'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const value = [nickname, encrypted, phone, address, detail_address, dong, bank, account, holder, 1000];
         DBindex_1.default.query(query, value, () => {
             return res.status(201).json({
                 result: true,
@@ -47,7 +47,7 @@ const login = (req, res) => {
     try {
         const privateKey = process.env.PASSWORD_SECRET_KEY;
         DBindex_1.default.query('select * from user where nickname=?', nickname, (error, result) => {
-            if (result[0].length < 1) {
+            if (result.length < 1) {
                 return res.status(401).json({
                     result: false,
                     err_code: 401,
@@ -86,6 +86,7 @@ const user_info = (req, res) => {
         phone: user.phone,
         address: user.address,
         detail_address: user.detail_address,
+        dong: user.dong,
         bank: user.bank,
         account: user.account,
         holder: user.holder,
@@ -150,9 +151,9 @@ const modify_phone = (req, res) => {
 };
 const modify_address = (req, res) => {
     const { user } = res.locals;
-    const { address, detail_address } = req.body;
+    const { address, detail_address, dong } = req.body;
     try {
-        DBindex_1.default.query('update user set address=?, detail_address=? where nickname=?', [address, detail_address, user.nickname], (error, result) => {
+        DBindex_1.default.query('update user set address=?, detail_address=?, dong=? where nickname=?', [address, detail_address, dong, user.nickname], (error, result) => {
             if (error)
                 return res.status(400).json({
                     result: false,

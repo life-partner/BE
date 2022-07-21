@@ -8,6 +8,7 @@ const post = (req: Request, res: Response) => {
   const {
     location,
     detail_location,
+    dong,
     price,
     period,
     use_point,
@@ -18,13 +19,13 @@ const post = (req: Request, res: Response) => {
     post_account,
     post_holder,
   } = req.body;
-
   const query =
-    'insert into article(location, detail_location, price, period, use_point, title, contents, post_bank, post_account, post_holder, status, point_earned, partner, writer, curdate() as date) ' +
-    'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    'insert into article(location, detail_location, dong, price, period, use_point, title, contents, post_bank, post_account, post_holder, point_earned, writer, date) ' +
+    'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date_format(curdate(), "%Y-%m-%d"))';
   const values = [
     location,
     detail_location,
+    dong,
     price,
     period,
     use_point,
@@ -33,24 +34,22 @@ const post = (req: Request, res: Response) => {
     post_bank,
     post_account,
     post_holder,
-    'waiting',
     point_earned,
-    null,
     user.nickname,
   ];
-
   try {
     db.query(query, values, (error: MysqlError | null, result: any[]) => {
-      if (error)
+      if (error) {
         return res.status(401).json({
           result: false,
         });
+      }
       return res.status(201).json({
         result: true,
       });
     });
   } catch (error) {
-    console.log('error in article_post: ', error);
+    console.log('catch error in article_post: ', error);
     return res.status(401).json({
       result: false,
     });
@@ -60,9 +59,8 @@ const post = (req: Request, res: Response) => {
 const main = (req: Request, res: Response) => {
   let is_user = false;
   if (res.locals.user) is_user = true;
-
   try {
-    db.query('select * from article where status=waiting', (error, result) => {
+    db.query('select *, date_format(date, "%Y-%m-%d") as date from article where status="waiting"', (error, result) => {
       if (error)
         return res.status(400).json({
           result: false,
@@ -73,11 +71,6 @@ const main = (req: Request, res: Response) => {
         articles: result,
       });
     });
-    // return res.json({
-    //     result: true,
-    //     is_user: is_user,
-    //     articles: data
-    // })
   } catch (error) {
     return res.status(400).json({
       result: false,
@@ -88,10 +81,9 @@ const main = (req: Request, res: Response) => {
 const detail = (req: Request, res: Response) => {
   let is_user = false;
   if (res.locals.user) is_user = true;
-  const { article_id } = req.params;
-
+  const { articleId } = req.params;
   try {
-    db.query('select * from article where id=?', article_id, (error, result) => {
+    db.query('select * from article where id=?', articleId, (error, result) => {
       if (error)
         return res.status(400).json({
           result: false,
@@ -110,23 +102,28 @@ const detail = (req: Request, res: Response) => {
 };
 
 const point = (req: Request, res: Response) => {
-  let is_user = false;
-  if (res.locals.user) is_user = true;
+  let data: any[] = [];
   const { user } = res.locals;
-
   try {
     db.query(
-      'select point, article.point_earned, article.date from user right outer join article.writer=? where nickname=?',
-      [user.nickname, user.nickname],
+      'select article.id, article.point_earned, date_format(article.date, "%Y-%m-%d") as date, user.current_point from article left join user on article.partner = user.nickname where article.partner=? order by article.id desc',
+      user.nickname,
       (error, result) => {
         if (error)
           return res.status(400).json({
             result: false,
           });
+        if (result.length < 1)
+          return res.status(400).json({
+            result: false,
+          });
+        for (let i = 0; i < result.length; i++) {
+          data.push({ id: result[i].id, point_earned: result[i].point_earned, date: result[i].date });
+        }
         return res.status(200).json({
           result: true,
-          current_point: result.point,
-          history: [{ point_earned: result.point_earned, dateTime: result.date }],
+          current_point: result[0].current_point,
+          history: data,
         });
       },
     );
@@ -139,10 +136,9 @@ const point = (req: Request, res: Response) => {
 
 const change_status = (req: Request, res: Response) => {
   const { status } = req.body;
-  const { article_id } = req.params;
-
+  const { articleId } = req.params;
   try {
-    db.query('update article set status=? where id=?', [status, article_id], (error) => {
+    db.query('update article set status=? where id=?', [status, articleId], (error) => {
       if (error)
         return res.status(400).json({
           result: false,
@@ -160,17 +156,16 @@ const change_status = (req: Request, res: Response) => {
 
 const choice = (req: Request, res: Response) => {
   const { nickname } = req.body;
-  const { article_id } = req.params;
-
+  const { articleId } = req.params;
   try {
-    db.query('update article set status=? partner=? where id=?', ['matching', nickname, article_id], (error) => {
+    db.query('update article set status="matching", partner=? where id=?', [nickname, articleId], (error) => {
       if (error)
         return res.status(400).json({
           result: false,
         });
-    });
-    return res.status(200).json({
-      result: true,
+      return res.status(200).json({
+        result: true,
+      });
     });
   } catch (error) {
     return res.status(400).json({
@@ -179,4 +174,31 @@ const choice = (req: Request, res: Response) => {
   }
 };
 
-export default { post, main, detail, point, change_status, choice };
+const search = (req: Request, res: Response) => {
+  let is_user = false;
+  if (res.locals.user) is_user = true;
+  const { minprice, maxperiod, location } = req.query;
+  try {
+    db.query(
+      'select *, date_format(date, "%Y-%m-%d") as date from article where point_earned >= ? and ? >= period and location = ? and status="waiting"',
+      [minprice, maxperiod, location],
+      (error, result) => {
+        if (error)
+          return res.status(400).json({
+            result: false,
+          });
+        return res.status(200).json({
+          result: true,
+          is_user: is_user,
+          articles: result,
+        });
+      },
+    );
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+    });
+  }
+};
+
+export default { post, main, detail, point, change_status, choice, search };

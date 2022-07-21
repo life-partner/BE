@@ -5,30 +5,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require('dotenv').config();
 const DBindex_1 = __importDefault(require("../DBindex"));
-const partners = (req, res) => {
-    const { article_id } = req.params;
-    let nickname = [];
+const partners_list = (req, res) => {
+    const { articleId } = req.params;
+    let data = [];
     try {
-        DBindex_1.default.query('select nickname from parner where articleId=?', article_id, (error, result) => {
+        DBindex_1.default.query('select partner from partner where article_id=?', articleId, (error, result) => {
             if (error)
-                return res.json({
+                return res.status(400).json({
                     result: false,
                 });
-            for (let i = 0; i < result[0].length; i++) {
-                nickname.push(result[0].nickname);
+            if (result.length > 5)
+                return res.status(400).json({
+                    result: false,
+                    err_code: 444,
+                });
+            for (let i = 0; i < result.length; i++) {
+                data.push(result[i].partner);
             }
-            console.log('list of partners: ', nickname);
-            res.json({
+            return res.status(200).json({
                 result: true,
-                partners: nickname,
+                partners: data,
             });
         });
     }
     catch (error) {
-        return res.json({
+        return res.status(400).json({
             result: false,
         });
     }
 };
-exports.default = { partners };
+const partners_post = (req, res) => {
+    const { articleId } = req.params;
+    const { user } = res.locals;
+    try {
+        DBindex_1.default.query('insert into partner(article_id, partner, date) values(?, ?, date_format(curdate(), "%Y-%m-%d"))', [articleId, user.nickname], (error) => {
+            if (error)
+                return res.status(400).json({
+                    result: false,
+                });
+            return res.status(200).json({
+                result: true,
+            });
+        });
+    }
+    catch (error) {
+        return res.status(400).json({
+            result: false,
+        });
+    }
+};
+exports.default = { partners_list, partners_post };
 //# sourceMappingURL=partner.js.map

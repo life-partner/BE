@@ -5,6 +5,7 @@ import partner_controller from '../controllers/partner';
 
 const router = express.Router();
 
-router.get('/:articleId/partners', auth, partner_controller.partners);
+router.get('/partners/:articleId/list', auth, partner_controller.partners_list);
+router.post('/partners/:articleId/post', auth, partner_controller.partners_post);
 
 export default router;

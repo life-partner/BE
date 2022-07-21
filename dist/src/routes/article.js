@@ -10,9 +10,10 @@ const article_1 = __importDefault(require("../controllers/article"));
 const router = express_1.default.Router();
 router.post('/articles', auth_1.default, article_1.default.post);
 router.get('/articles', auth_1.default, article_1.default.main);
-router.get('/:articleId', auth_1.default, article_1.default.detail);
+router.get('/articles/detail/:articleId', auth_1.default, article_1.default.detail);
 router.get('/point', auth_1.default, article_1.default.point);
-router.patch('/:articleId', auth_1.default, article_1.default.change_status);
-router.patch('/:articleId/partners', auth_1.default, article_1.default.choice);
+router.patch('/articles/:articleId', auth_1.default, article_1.default.change_status);
+router.patch('/articles/:articleId/partners', auth_1.default, article_1.default.choice);
+router.get('/articles/search', auth_1.default, article_1.default.search);
 exports.default = router;
 //# sourceMappingURL=article.js.map
