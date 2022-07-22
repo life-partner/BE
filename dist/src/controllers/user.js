@@ -8,9 +8,9 @@ const DBindex_1 = __importDefault(require("../DBindex"));
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const signup = (req, res) => {
-    const { nickname, password, phone, address, detail_address, dong, bank, account, holder } = req.body;
+    const { nickname, password, phone, address, detail_address, gu, dong, bank, account, holder } = req.body;
     // 필수 데이터 중 하나라도 빈 값으로 넘어오면 예외 처리
-    if (!nickname || !password || !phone || !address || !detail_address || !dong)
+    if (!nickname || !password || !phone || !address || !detail_address || !dong || !gu)
         return res.status(401).json({
             result: false,
             err_code: 401,
@@ -26,9 +26,9 @@ const signup = (req, res) => {
         });
         const privateKey = process.env.PASSWORD_SECRET_KEY;
         const encrypted = crypto_js_1.default.AES.encrypt(JSON.stringify(password), privateKey).toString();
-        const query = 'insert into user(nickname, password, phone, address, detail_address, dong, bank, account, holder, current_point) ' +
+        const query = 'insert into user(nickname, password, phone, address, detail_address, gu, dong, bank, account, holder, current_point) ' +
             'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        const value = [nickname, encrypted, phone, address, detail_address, dong, bank, account, holder, 1000];
+        const value = [nickname, encrypted, phone, address, detail_address, gu, dong, bank, account, holder, 1000];
         DBindex_1.default.query(query, value, () => {
             return res.status(201).json({
                 result: true,

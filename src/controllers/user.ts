@@ -6,9 +6,9 @@ import { Request, Response } from 'express';
 import { MysqlError } from 'mysql';
 
 const signup = (req: Request, res: Response) => {
-  const { nickname, password, phone, address, detail_address, dong, bank, account, holder } = req.body;
+  const { nickname, password, phone, address, detail_address, gu, dong, bank, account, holder } = req.body;
   // 필수 데이터 중 하나라도 빈 값으로 넘어오면 예외 처리
-  if (!nickname || !password || !phone || !address || !detail_address || !dong)
+  if (!nickname || !password || !phone || !address || !detail_address || !dong || !gu)
     return res.status(401).json({
       result: false,
       err_code: 401,
@@ -25,9 +25,9 @@ const signup = (req: Request, res: Response) => {
     const privateKey: string | undefined = process.env.PASSWORD_SECRET_KEY;
     const encrypted = cryptojs.AES.encrypt(JSON.stringify(password), privateKey!).toString();
     const query =
-      'insert into user(nickname, password, phone, address, detail_address, dong, bank, account, holder, current_point) ' +
+      'insert into user(nickname, password, phone, address, detail_address, gu, dong, bank, account, holder, current_point) ' +
       'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    const value = [nickname, encrypted, phone, address, detail_address, dong, bank, account, holder, 1000];
+    const value = [nickname, encrypted, phone, address, detail_address, gu, dong, bank, account, holder, 1000];
     db.query(query, value, () => {
       return res.status(201).json({
         result: true,

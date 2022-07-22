@@ -7,12 +7,13 @@ require('dotenv').config();
 const DBindex_1 = __importDefault(require("../DBindex"));
 const post = (req, res) => {
     const { user } = res.locals;
-    const { location, detail_location, dong, price, period, use_point, point_earned, title, contents, post_bank, post_account, post_holder, } = req.body;
-    const query = 'insert into article(location, detail_location, dong, price, period, use_point, title, contents, post_bank, post_account, post_holder, point_earned, writer, date) ' +
-        'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date_format(curdate(), "%Y-%m-%d"))';
+    const { location, detail_location, gu, dong, price, period, use_point, point_earned, title, contents, post_bank, post_account, post_holder, } = req.body;
+    const query = 'insert into article(location, detail_location, gu, dong, price, period, use_point, title, contents, post_bank, post_account, post_holder, point_earned, writer, date) ' +
+        'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date_format(curdate(), "%Y-%m-%d"))';
     const values = [
         location,
         detail_location,
+        gu,
         dong,
         price,
         period,
@@ -164,9 +165,12 @@ const search = (req, res) => {
     let is_user = false;
     if (res.locals.user)
         is_user = true;
-    const { minprice, maxperiod, location } = req.query;
+    const { minprice, maxperiod, location1, location2, location3 } = req.query;
+    const [location1_gu, location1_dong] = location1.split(' ');
+    const [location2_gu, location2_dong] = location2.split(' ');
+    const [location3_gu, location3_dong] = location3.split(' ');
     try {
-        DBindex_1.default.query('select *, date_format(date, "%Y-%m-%d") as date from article where point_earned >= ? and ? >= period and location = ? and status="waiting"', [minprice, maxperiod, location], (error, result) => {
+        DBindex_1.default.query('select *, date_format(date, "%Y-%m-%d") as date from article where price >= ? and ? >= period and status="waiting" and ((gu=? and dong=?) or (gu=? and dong=?) or (gu=? and dong=?))', [minprice, maxperiod, location1_gu, location1_dong, location2_gu, location2_dong, location3_gu, location3_dong], (error, result) => {
             if (error)
                 return res.status(400).json({
                     result: false,
