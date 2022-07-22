@@ -27,7 +27,7 @@ const signup = (req: Request, res: Response) => {
     const encrypted = cryptojs.AES.encrypt(JSON.stringify(password), privateKey!).toString();
     const query =
       'insert into user(nickname, password, phone, address, detail_address, gu, dong, bank, account, holder, current_point) ' +
-      'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     const value = [nickname, encrypted, phone, address, detail_address, gu, dong, bank, account, holder, 1000];
     db.query(query, value, (error, result) => {
       console.log('sql error: ', error);
