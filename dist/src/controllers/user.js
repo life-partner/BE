@@ -9,6 +9,7 @@ const crypto_js_1 = __importDefault(require("crypto-js"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const signup = (req, res) => {
     const { nickname, password, phone, address, detail_address, gu, dong, bank, account, holder } = req.body;
+    console.log('req.body: ', req.body);
     // 필수 데이터 중 하나라도 빈 값으로 넘어오면 예외 처리
     if (!nickname || !password || !phone || !address || !detail_address || !dong || !gu)
         return res.status(401).json({
@@ -29,7 +30,13 @@ const signup = (req, res) => {
         const query = 'insert into user(nickname, password, phone, address, detail_address, gu, dong, bank, account, holder, current_point) ' +
             'values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         const value = [nickname, encrypted, phone, address, detail_address, gu, dong, bank, account, holder, 1000];
-        DBindex_1.default.query(query, value, () => {
+        DBindex_1.default.query(query, value, (error, result) => {
+            console.log('sql error: ', error);
+            console.log('sql result: ', result);
+            if (error)
+                return res.status(401).json({
+                    result: false,
+                });
             return res.status(201).json({
                 result: true,
             });
