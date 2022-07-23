@@ -56,14 +56,16 @@ const login = (req: Request, res: Response) => {
     db.query('select * from user where nickname=?', nickname, (error, result) => {
       console.log('sql error in login: ', error);
       console.log('sql result in login: ', result);
-      if (result.length < 1) {
+      if (result[0].length < 1) {
         return res.status(401).json({
           result: false,
           err_code: 401,
         });
       }
       const bytes = cryptojs.AES.decrypt(result[0].password, privateKey!);
+      console.log('bytes: ', bytes);
       const decrypted = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+      console.log('decrypted: ', decrypted);
       if (password === decrypted) {
         const token = jwt.sign(
           {
