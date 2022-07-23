@@ -52,7 +52,6 @@ const login = (req: Request, res: Response) => {
   const { nickname, password } = req.body;
   console.log('req.body in login: ', req.body);
   try {
-    const privateKey: string | undefined = process.env.PASSWORD_SECRET_KEY;
     db.query('select * from user where nickname=?', nickname, (error, result) => {
       console.log('sql error in login: ', error);
       console.log('sql result in login: ', result);
@@ -64,6 +63,7 @@ const login = (req: Request, res: Response) => {
           err_code: 401,
         });
       }
+      const privateKey: string | undefined = process.env.PASSWORD_SECRET_KEY;
       const bytes = cryptojs.AES.decrypt(result[0].password, privateKey!);
       console.log('bytes: ', bytes);
       const decrypted = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
