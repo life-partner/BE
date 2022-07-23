@@ -51,9 +51,12 @@ const signup = (req, res) => {
 };
 const login = (req, res) => {
     const { nickname, password } = req.body;
+    console.log('req.body in login: ', req.body);
     try {
         const privateKey = process.env.PASSWORD_SECRET_KEY;
         DBindex_1.default.query('select * from user where nickname=?', nickname, (error, result) => {
+            console.log('sql error in login: ', error);
+            console.log('sql result in login: ', result);
             if (result.length < 1) {
                 return res.status(401).json({
                     result: false,
