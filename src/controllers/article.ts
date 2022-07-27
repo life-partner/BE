@@ -185,10 +185,10 @@ const search = (req: Request, res: Response) => {
   const [location2_gu, location2_dong] = location2.split(' ');
   const [location3_gu, location3_dong] = location3.split(' ');
   try {
-    var query =
+    let query =
       'select *, date_format(date, "%Y-%m-%d") as date from article where price >= ? and ? >= period and status="waiting" and ((gu=? and dong=?) or (gu=? and dong=?) or (gu=? and dong=?))';
     if (location1 === '* *') {
-      var query = 'select *, date_format(date, "%Y-%m-%d") as date from article where price >= ? and ? >= period';
+      query = 'select *, date_format(date, "%Y-%m-%d") as date from article where price >= ? and ? >= period';
     }
     db.query(
       query,
