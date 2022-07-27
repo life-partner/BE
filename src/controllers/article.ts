@@ -180,14 +180,21 @@ const search = (req: Request, res: Response) => {
   let is_user = false;
   if (res.locals.user) is_user = true;
   const { minprice, maxperiod, location1, location2, location3 } = req.query;
+  console.log('req.query: ', req.query);
   const [location1_gu, location1_dong] = location1.split(' ');
   const [location2_gu, location2_dong] = location2.split(' ');
   const [location3_gu, location3_dong] = location3.split(' ');
   try {
+    var query =
+      'select *, date_format(date, "%Y-%m-%d") as date from article where price >= ? and ? >= period and status="waiting" and ((gu=? and dong=?) or (gu=? and dong=?) or (gu=? and dong=?))';
+    if (location1 === '* *') {
+      var query = 'select *, date_format(date, "%Y-%m-%d") as date from article where price >= ? and ? >= period';
+    }
     db.query(
-      'select *, date_format(date, "%Y-%m-%d") as date from article where price >= ? and ? >= period and status="waiting" and ((gu=? and dong=?) or (gu=? and dong=?) or (gu=? and dong=?))',
+      query,
       [minprice, maxperiod, location1_gu, location1_dong, location2_gu, location2_dong, location3_gu, location3_dong],
       (error, result) => {
+        console.log('sql error: ', error);
         if (error)
           return res.status(400).json({
             result: false,
@@ -200,6 +207,7 @@ const search = (req: Request, res: Response) => {
       },
     );
   } catch (error) {
+    console.log('catch error: ', error);
     return res.status(400).json({
       result: false,
     });

@@ -54,10 +54,6 @@ const login = (req, res) => {
     console.log('req.body in login: ', req.body);
     try {
         DBindex_1.default.query('select * from user where nickname=?', nickname, (error, result) => {
-            console.log('sql error in login: ', error);
-            console.log('sql result in login: ', result);
-            console.log('sql result in login[0]: ', result[0]);
-            console.log('sql result in login[0].password: ', result[0].password);
             if (result[0].length < 1) {
                 return res.status(401).json({
                     result: false,

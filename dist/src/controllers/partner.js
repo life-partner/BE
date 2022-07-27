@@ -38,13 +38,23 @@ const partners_post = (req, res) => {
     const { articleId } = req.params;
     const { user } = res.locals;
     try {
-        DBindex_1.default.query('insert into partner(article_id, partner, date) values(?, ?, date_format(curdate(), "%Y-%m-%d"))', [articleId, user.nickname], (error) => {
+        DBindex_1.default.query('select * from partner where aritlce_id=? and partner=?', [articleId, user.nickname], (error, result) => {
             if (error)
                 return res.status(400).json({
                     result: false,
                 });
-            return res.status(200).json({
-                result: true,
+            if (result[0].length > 0)
+                return res.status(400).json({
+                    result: false,
+                });
+            DBindex_1.default.query('insert into partner(article_id, partner, date) values(?, ?, date_format(curdate(), "%Y-%m-%d"))', [articleId, user.nickname], (error) => {
+                if (error)
+                    return res.status(400).json({
+                        result: false,
+                    });
+                return res.status(200).json({
+                    result: true,
+                });
             });
         });
     }
