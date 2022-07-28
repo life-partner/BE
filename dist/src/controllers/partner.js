@@ -37,26 +37,29 @@ const partners_list = (req, res) => {
 const partners_post = (req, res) => {
     const { articleId } = req.params;
     const { user } = res.locals;
+    console.log('req.params: ', req.params);
+    console.log('res.locals: ', res.locals);
     try {
-        DBindex_1.default.query('select * from partner where aritlce_id=? and partner=?', [articleId, user.nickname], (error, result) => {
+        // db.query('select * from partner where aritlce_id=? and partner=?', [articleId, user.nickname], (error, result) => {
+        //   if (error)
+        //     return res.status(400).json({
+        //       result: false,
+        //     });
+        //   if (result[0].length > 0)
+        //     return res.status(400).json({
+        //       result: false,
+        //     });
+        DBindex_1.default.query('insert into partner(article_id, partner, date) values(?, ?, date_format(curdate(), "%Y-%m-%d"))', [articleId, user.nickname], (error) => {
+            console.log('sql error: ', error);
             if (error)
                 return res.status(400).json({
                     result: false,
                 });
-            if (result[0].length > 0)
-                return res.status(400).json({
-                    result: false,
-                });
-            DBindex_1.default.query('insert into partner(article_id, partner, date) values(?, ?, date_format(curdate(), "%Y-%m-%d"))', [articleId, user.nickname], (error) => {
-                if (error)
-                    return res.status(400).json({
-                        result: false,
-                    });
-                return res.status(200).json({
-                    result: true,
-                });
+            return res.status(200).json({
+                result: true,
             });
         });
+        // });
     }
     catch (error) {
         return res.status(400).json({
