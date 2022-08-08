@@ -100,14 +100,20 @@ const detail = (req, res) => {
 const point = (req, res) => {
     let data = [];
     const { user } = res.locals;
+    console.log('res.locals.user: ', user);
     try {
         DBindex_1.default.query('select article.id, article.point_earned, date_format(article.date, "%Y-%m-%d") as date, user.current_point from article left join user on article.partner = ? where article.partner = ? order by article.id desc', [user.nickname, user.nickname], (error, result) => {
+            console.log('resulq.length: ', result.length);
+            console.log('sql error_1: ', error);
+            console.log('sql result_1; ', result);
             if (error)
                 return res.status(400).json({
                     result: false,
                 });
             if (result.length < 1) {
                 DBindex_1.default.query('select date_format(date, "%Y-%m-%d") as date from user where nickname = ?', user.nickname, (err, result) => {
+                    console.log('sql error_2: ', err);
+                    console.log('sql result_2: ', result[0]);
                     if (err)
                         return res.status(400).json({
                             result: false,
