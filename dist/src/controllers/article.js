@@ -107,7 +107,7 @@ const point = (req, res) => {
                     result: false,
                 });
             if (result.length < 1) {
-                DBindex_1.default.query('select date from user where nickname = ?', user.nickname, (err, result) => {
+                DBindex_1.default.query('select date_format(date, "%Y-%m-%d") as date from user where nickname = ?', user.nickname, (err, result) => {
                     if (err)
                         return res.status(400).json({
                             result: false,
