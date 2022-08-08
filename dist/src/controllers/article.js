@@ -102,28 +102,16 @@ const point = (req, res) => {
     const { user } = res.locals;
     console.log('res.locals.user: ', user);
     try {
-        DBindex_1.default.query('select article.id, article.point_earned, date_format(article.date, "%Y-%m-%d") as date, user.current_point from article left join user on article.partner = ? where article.partner = ? order by article.id desc', [user.nickname, user.nickname], (error, result) => {
-            console.log('result[0].length: ', result[0].length);
-            console.log('sql error_1: ', error);
-            console.log('sql result_1; ', result);
+        DBindex_1.default.query('select article.id, article.point_earned, date_format(article.date, "%Y-%m-%d") as date from article where article.partner = ? order by article.id desc', user.nickname, (error, result) => {
             if (error)
                 return res.status(400).json({
                     result: false,
                 });
-            if (result[0].length < 1) {
-                console.log('length 0이라서 if문 진입함');
-                DBindex_1.default.query('select date_format(date, "%Y-%m-%d") as date from user where nickname = ?', user.nickname, (err, result) => {
-                    console.log('sql error_2: ', err);
-                    console.log('sql result_2: ', result[0]);
-                    if (err)
-                        return res.status(400).json({
-                            result: false,
-                        });
-                    return res.status(200).json({
-                        result: true,
-                        current_point: user.current_point,
-                        date: result[0].date,
-                    });
+            if (result.length < 1) {
+                return res.status(200).json({
+                    result: true,
+                    current_point: user.current_point,
+                    date: user.date,
                 });
             }
             for (let i = 0; i < result.length; i++) {
@@ -131,7 +119,7 @@ const point = (req, res) => {
             }
             return res.status(200).json({
                 result: true,
-                current_point: result[0].current_point,
+                current_point: user.current_point,
                 history: data,
             });
         });
