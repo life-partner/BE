@@ -46,6 +46,7 @@ const post = (req, res) => {
     }
 };
 const main = (req, res) => {
+    let data = [];
     let is_user = false;
     if (res.locals.user)
         is_user = true;
@@ -56,10 +57,13 @@ const main = (req, res) => {
                     result: false,
                 });
             }
+            for (let i = 0; i < result.length; i++) {
+                data.push(result[i]);
+            }
             return res.status(200).json({
                 result: true,
                 is_user: is_user,
-                articles: result[0],
+                articles: data,
             });
         });
     }
