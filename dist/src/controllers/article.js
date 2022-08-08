@@ -51,14 +51,15 @@ const main = (req, res) => {
         is_user = true;
     try {
         DBindex_1.default.query('select *, date_format(date, "%Y-%m-%d") as date from article where status="waiting"', (error, result) => {
-            if (error)
+            if (error) {
                 return res.status(400).json({
                     result: false,
                 });
+            }
             return res.status(200).json({
                 result: true,
                 is_user: is_user,
-                articles: result,
+                articles: result[0],
             });
         });
     }
