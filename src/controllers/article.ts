@@ -120,11 +120,19 @@ const point = (req: Request, res: Response) => {
           return res.status(400).json({
             result: false,
           });
-        if (result.length < 1)
-          return res.status(200).json({
-            result: true,
-            current_point: user.current_point,
+        if (result.length < 1) {
+          db.query('select date from user where nickname = ?', user.nickname, (err, result) => {
+            if (err)
+              return res.status(400).json({
+                result: false,
+              });
+            return res.status(200).json({
+              result: true,
+              current_point: user.current_point,
+              date: result[0].date,
+            });
           });
+        }
         for (let i = 0; i < result.length; i++) {
           data.push({ id: result[i].id, point_earned: result[i].point_earned, date: result[i].date });
         }
