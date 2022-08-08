@@ -101,14 +101,15 @@ const point = (req, res) => {
     let data = [];
     const { user } = res.locals;
     try {
-        DBindex_1.default.query('select article.id, article.point_earned, date_format(article.date, "%Y-%m-%d") as date, user.current_point from article left join user on article.partner = user.nickname where article.partner=? order by article.id desc', user.nickname, (error, result) => {
+        DBindex_1.default.query('select article.id, article.point_earned, date_format(article.date, "%Y-%m-%d") as date, user.current_point from article left join user on article.partner = ? where article.partner = ? order by article.id desc', [user.nickname, user.nickname], (error, result) => {
             if (error)
                 return res.status(400).json({
                     result: false,
                 });
             if (result.length < 1)
-                return res.status(400).json({
-                    result: false,
+                return res.status(200).json({
+                    result: true,
+                    current_point: user.current_point,
                 });
             for (let i = 0; i < result.length; i++) {
                 data.push({ id: result[i].id, point_earned: result[i].point_earned, date: result[i].date });
