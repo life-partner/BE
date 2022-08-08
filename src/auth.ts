@@ -4,17 +4,20 @@ import { MysqlError } from 'mysql';
 import db from './DBindex';
 import jwt from 'jsonwebtoken';
 
-const auth = async (req: Request, res: Response, next: NextFunction) => {
+const auth = (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
+  console.log('authorization: ', authorization);
   if (!authorization) return res.status(400).json({ result: false });
 
   const [token_type, token_value] = authorization.split(' ');
-  if (token_type === 'NOT') next();
+  console.log('token_type: ', token_type);
+  console.log('true OR false: ', token_type === 'NOT' ? true : false);
+  if (token_type === 'NOT') return next();
   if (token_type !== 'Bearer') return res.status(400).json({ result: false });
 
   try {
     const { id }: any = jwt.verify(token_value, process.env.TOKEN_SECRET_KEY!);
-    await db.query('select * from user where id=?', id, (err: MysqlError | null, result: any[]) => {
+    db.query('select * from user where id=?', id, (err: MysqlError | null, result: any[]) => {
       if (err) return res.status(400).json({ result: false });
       res.locals.user = result[0];
       next();
