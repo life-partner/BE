@@ -8,12 +8,9 @@ const DBindex_1 = __importDefault(require("./DBindex"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth = (req, res, next) => {
     const { authorization } = req.headers;
-    console.log('authorization: ', authorization);
     if (!authorization)
         return res.status(400).json({ result: false });
     const [token_type, token_value] = authorization.split(' ');
-    console.log('token_type: ', token_type);
-    console.log('true OR false: ', token_type === 'NOT' ? true : false);
     if (token_type === 'NOT')
         return next();
     if (token_type !== 'Bearer')
