@@ -149,7 +149,11 @@ const change_status = (req: Request, res: Response) => {
   const { status } = req.body;
   const { articleId } = req.params;
   try {
-    db.query('update article set status=? where id=?', [status, articleId], (error) => {
+    let query = 'update article set status=? where id=?';
+    if (status === 'waiting') {
+      query = 'update article set status = ? partner = null where id = ?';
+    }
+    db.query(query, [status, articleId], (error) => {
       if (error)
         return res.status(400).json({
           result: false,
