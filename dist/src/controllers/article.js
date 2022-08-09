@@ -133,19 +133,21 @@ const point = (req, res) => {
 const change_status = (req, res) => {
     const { status } = req.body;
     const { articleId } = req.params;
+    console.log('status & articleId: ', status, ' & ', articleId);
     try {
         let query = 'update article set status=? where id=?';
         if (status === 'waiting') {
             query = 'update article set status = ? partner = null where id = ?';
         }
+        console.log('query: ', query);
         DBindex_1.default.query(query, [status, articleId], (error) => {
             if (error)
                 return res.status(400).json({
                     result: false,
                 });
-        });
-        return res.status(200).json({
-            result: true,
+            return res.status(200).json({
+                result: true,
+            });
         });
     }
     catch (error) {
