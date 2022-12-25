@@ -2,39 +2,28 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class UserSignupDto {
-  @PrimaryGeneratedColumn()
-  readonly id: number;
+  id: number;
 
-  @Column()
-  readonly nickname: string;
+  nickname: string;
 
-  @Column()
-  static password: string;
+  password: string;
 
-  @Column()
-  readonly phone: string;
+  phone: string;
 
-  @Column()
-  readonly address: string;
+  address: string;
 
-  @Column()
-  readonly detail_address: string;
+  detail_address: string;
 
-  @Column()
-  readonly gu: string;
+  gu: string;
 
-  @Column()
-  readonly dong: string;
+  dong: string;
 
-  @Column()
-  readonly bank: string;
+  bank: string;
 
-  @Column()
-  readonly account: string;
+  account: string;
 
-  @Column()
-  readonly holder: string;
+  holder: string;
 
-  @Column()
-  readonly current_point: number;
+  // @Column()
+  // readonly current_point: number;
 }

@@ -1,5 +1,14 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Headers,
+  Patch,
+} from '@nestjs/common';
 import { UserLoginDto } from './dto/login.dto';
+import { UserModifyPWDto } from './dto/modifyPassword.dto';
 import { UserSignupDto } from './dto/signup.dto';
 import { UserService } from './user.service';
 
@@ -7,18 +16,26 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  async getUsers(): Promise<UserSignupDto[]> {
-    return await this.userService.findAll();
-  }
-
   @Post('signup')
-  async signup(@Body() data: UserSignupDto) {
-    return await this.userService.signup(data);
+  signup(@Body() body: UserSignupDto) {
+    return this.userService.signup(body);
   }
 
-  // @Post('login')
-  // async login(@Body() data: UserLoginDto) {
-  //   return this.userService.login(data);
-  // }
+  @Post('login')
+  login(@Body() body: UserLoginDto) {
+    return this.userService.login(body);
+  }
+
+  @UseGuards()
+  @Get('user-info')
+  userInfo(@Headers() headers: any) {
+    console.log(headers);
+    return this.userService.userInfo(headers);
+  }
+
+  @UseGuards()
+  @Patch('user-info/password')
+  modifyPW(@Headers() headers: any, @Body() body: UserModifyPWDto) {
+    return this.userService.modifyPW(headers, body);
+  }
 }
